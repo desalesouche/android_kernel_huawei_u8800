@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2012, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2009-2013, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -127,7 +127,8 @@
 static struct platform_device ion_dev;
 #define MSM_ION_AUDIO_SIZE	(MSM_PMEM_AUDIO_SIZE + PMEM_KERNEL_EBI0_SIZE)
 #define MSM_ION_SF_SIZE		MSM_PMEM_SF_SIZE
-#define MSM_ION_HEAP_NUM	4
+#define MSM_ION_WB_SIZE		MSM_FB_OVERLAY0_WRITEBACK_SIZE
+#define MSM_ION_HEAP_NUM	5
 #endif
 
 #define PMIC_GPIO_INT		27
@@ -5206,6 +5207,15 @@ struct ion_platform_heap msm7x30_heaps[] = {
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *)&co_ion_pdata,
 		},
+		/* WRITEBACK */
+		{
+			.id	= ION_CP_WB_HEAP_ID,
+			.type	= ION_HEAP_TYPE_CARVEOUT,
+			.name	= ION_WB_HEAP_NAME,
+			.memory_type = ION_EBI_TYPE,
+			.has_outer_cache = 1,
+			.extra_data = (void *)&co_ion_pdata,
+		},
 #endif
 };
 
@@ -5292,6 +5302,7 @@ static void __init size_ion_devices(void)
 	ion_pdata.heaps[1].size = msm_ion_camera_size;
 	ion_pdata.heaps[2].size = MSM_ION_AUDIO_SIZE;
 	ion_pdata.heaps[3].size = MSM_ION_SF_SIZE;
+	ion_pdata.heaps[4].size = MSM_ION_WB_SIZE;
 #endif
 }
 
@@ -5301,6 +5312,7 @@ static void __init reserve_ion_memory(void)
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += msm_ion_camera_size;
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_AUDIO_SIZE;
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_SF_SIZE;
+	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_WB_SIZE;
 #endif
 }
 
