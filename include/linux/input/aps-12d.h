@@ -6,8 +6,6 @@
 #ifndef __APS_12D_H__
 #define __APS_12D_H__
 
-#include <linux/delay.h>
-
 /* 12-bit ADC value. */
 #define APS_12D_MAX_VALUE	4095
 /* APS-12D has a minimum delay of 52.5ms. */
@@ -100,9 +98,9 @@ struct aps_12d_settings {
 #define APS_IOCTL_GET_STATUS	_IOR(APS_MAGIC, 0x12, enum aps_12d_status)
 
 #define APS_IOCTL_GET_LIGHT_ENABLE			_IOR(APS_MAGIC, 0x20, bool)
-#define APS_IOCTL_SET_LIGHT_ENABLE			_IOR(APS_MAGIC, 0x21, bool)
+#define APS_IOCTL_SET_LIGHT_ENABLE			_IOW(APS_MAGIC, 0x21, bool)
 #define APS_IOCTL_GET_PROXIMITY_ENABLE		_IOR(APS_MAGIC, 0x22, bool)
-#define APS_IOCTL_SET_PROXIMITY_ENABLE		_IOR(APS_MAGIC, 0x23, bool)
+#define APS_IOCTL_SET_PROXIMITY_ENABLE		_IOW(APS_MAGIC, 0x23, bool)
 
 /* Returns nanoseconds. */
 #define APS_IOCTL_GET_LIGHT_DELAY			_IOR(APS_MAGIC, 0x30, int64_t)
