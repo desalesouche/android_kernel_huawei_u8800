@@ -475,6 +475,49 @@ static struct platform_device msm_ispeaker_rx_device = {
 
 };
 
+static struct adie_codec_action_unit ispeaker_rx_48KHz_osr256_actions_u8800[] =
+   SPEAKER_RX_48000_OSR_256_U8800;
+
+static struct adie_codec_hwsetting_entry ispeaker_rx_settings_u8800[] = {
+	{
+		.freq_plan = 48000,
+		.osr = 256,
+		.actions = ispeaker_rx_48KHz_osr256_actions_u8800,
+		.action_sz = ARRAY_SIZE(ispeaker_rx_48KHz_osr256_actions_u8800),
+	}
+};
+
+static struct adie_codec_dev_profile ispeaker_rx_profile_u8800 = {
+	.path_type = ADIE_CODEC_RX,
+	.settings = ispeaker_rx_settings_u8800,
+	.setting_sz = ARRAY_SIZE(ispeaker_rx_settings_u8800),
+};
+
+static struct snddev_icodec_data snddev_ispeaker_rx_data_u8800 = {
+	.capability = (SNDDEV_CAP_RX | SNDDEV_CAP_VOICE),
+	.name = "speaker_stereo_rx", /* Not actually stereo. */
+	.copp_id = 0,
+	.acdb_id = ACDB_ID_SPKR_PHONE_MONO,
+	.profile = &ispeaker_rx_profile_u8800,
+	.channel_mode = 1,
+	.pmctl_id = NULL,
+	.pmctl_id_sz = 0,
+	.default_sample_rate = 48000,
+	.pamp_on = &msm_snddev_poweramp_on,
+	.pamp_off = &msm_snddev_poweramp_off,
+	.max_voice_rx_vol[VOC_NB_INDEX] = 1000,
+	.min_voice_rx_vol[VOC_NB_INDEX] = -500,
+	.max_voice_rx_vol[VOC_WB_INDEX] = 1000,
+	.min_voice_rx_vol[VOC_WB_INDEX] = -500,
+};
+
+static struct platform_device msm_ispeaker_rx_device_u8800 = {
+	.name = "snddev_icodec",
+	.id = 8,
+	.dev = { .platform_data = &snddev_ispeaker_rx_data_u8800 },
+
+};
+
 static struct adie_codec_action_unit ifmradio_speaker_osr64_actions[] =
 	FM_SPEAKER_OSR_64;
 
@@ -1427,6 +1470,31 @@ static struct platform_device *snd_devices_fluid[] __initdata = {
 	&msm_ifmradio_headset_device,
 };
 
+static struct platform_device *snd_devices_u8800[] __initdata = {
+	&msm_iearpiece_device,
+	&msm_imic_device,
+	&msm_ihs_stereo_rx_device,
+	&msm_ihs_mono_rx_device,
+	&msm_ihs_mono_tx_device,
+	&msm_bt_sco_earpiece_device,
+	&msm_bt_sco_mic_device,
+	&msm_ifmradio_handset_device,
+	&msm_ispeaker_rx_device_u8800,
+	&msm_ifmradio_speaker_device,
+	&msm_ifmradio_headset_device,
+	&msm_idual_mic_broadside_device,
+	&msm_spk_idual_mic_broadside_device,
+	&msm_itty_hs_mono_tx_device,
+	&msm_itty_hs_mono_rx_device,
+	&msm_ispeaker_tx_device,
+	&msm_ihs_stereo_speaker_stereo_rx_device,
+	&msm_a2dp_rx_device,
+	&msm_a2dp_tx_device,
+	&msm_snddev_mi2s_stereo_rx_device,
+	&msm_snddev_mi2s_fm_tx_device,
+	&msm_uplink_rx_device,
+};
+
 #ifdef CONFIG_DEBUG_FS
 static void snddev_hsed_config_modify_setting(int type)
 {
@@ -1532,6 +1600,9 @@ void __ref msm_snddev_init(void)
 	else if (machine_is_msm7x30_fluid())
 		platform_add_devices(snd_devices_fluid,
 		ARRAY_SIZE(snd_devices_fluid));
+	else if (machine_is_huawei_u8800())
+		platform_add_devices(snd_devices_u8800,
+		ARRAY_SIZE(snd_devices_u8800));
 	else
 		pr_err("%s: Unknown machine type\n", __func__);
 }
