@@ -15,26 +15,15 @@
 #include "msm_fb.h"
 #include "mddihost.h"
 #include "mddihosti.h"
-#include <linux/pwm.h>
-#ifdef CONFIG_PMIC8058_PWM
-#include <linux/mfd/pmic8058.h>
-#include <linux/pmic8058-pwm.h>
-#endif
 
 #define ENTER_SLEEP_MODE			0x1000
 #define EXIT_SLEEP_MODE				0x1100
 #define SET_DISPLAY_OFF				0x2800
 #define SET_DISPLAY_ON				0x2900
-#define WRPWMF						0x6A02
+#define WRDISBV						0x5100
+#define WRCTRLD						0x5300
 
-#define BL_MAX 256
-
-#ifdef CONFIG_PMIC8058_PWM
-static struct pwm_device *bl_pwm;
-
-#define PWM_PERIOD	1790	/* us, period of 1.79Khz */
-#define DUTY_LEVEL	(PWM_PERIOD / BL_MAX)
-#endif
+#define BL_MAX 255
 
 static struct msm_panel_common_pdata *mddi_nt35582_pdata;
 
@@ -60,14 +49,7 @@ static int mddi_nt35582_panel_off(struct platform_device *pdev)
 
 static void mddi_nt35582_panel_set_backlight(struct msm_fb_data_type *mfd)
 {
-	int bl_level = mfd->bl_level;
-
-#ifdef CONFIG_PMIC8058_PWM
-	if (bl_pwm) {
-		pwm_config(bl_pwm, DUTY_LEVEL * bl_level, PWM_PERIOD);
-		pwm_enable(bl_pwm);
-	}
-#endif
+	mddi_queue_register_write(WRDISBV, mfd->bl_level, FALSE, NULL);
 }
 
 static int __devinit nt35582_probe(struct platform_device *pdev)
@@ -77,25 +59,8 @@ static int __devinit nt35582_probe(struct platform_device *pdev)
 		return 0;
 	}
 
-#ifdef CONFIG_PMIC8058_PWM
-	/* Write PWMDIV 12 to specify PWM frequency. */
-	mddi_queue_register_write(WRPWMF, 0xC, FALSE, NULL);
-
-	bl_pwm = pwm_request(mddi_nt35582_pdata->gpio, "backlight");
-	if (bl_pwm == NULL || IS_ERR(bl_pwm)) {
-		pr_err("%s pwm_request() failed\n", __func__);
-		bl_pwm = NULL;
-	}
-
-	/* Add default brightness. */
-	if (bl_pwm) {
-		pwm_config(bl_pwm, DUTY_LEVEL * 150, PWM_PERIOD);
-		pwm_enable(bl_pwm);
-	}
-
-	pr_debug("%s: bl_pwm=%x LPG_chan=%d\n",
-		__func__, (int) bl_pwm, mddi_nt35582_pdata->gpio);
-#endif
+	/* HIGH, Backlight Control */
+	mddi_queue_register_write(WRCTRLD, 0x24, FALSE, NULL);
 
 	msm_fb_add_device(pdev);
 
