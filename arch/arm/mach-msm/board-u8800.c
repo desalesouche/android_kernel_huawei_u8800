@@ -2770,14 +2770,9 @@ static struct platform_device qcedev_device = {
 };
 #endif
 
-static struct msm_panel_common_pdata mddi_nt35582_wvga_pdata = {
-	.gpio = 1,  /* LPG PMIC_GPIO25 channel number */
-};
-
 static struct platform_device mddi_nt35582_wvga_device = {
 	.name	= "mddi_nt35582_wvga",
 	.id		= 0,
-	.dev.platform_data = &mddi_nt35582_wvga_pdata,
 };
 
 static int display_power(int on)
