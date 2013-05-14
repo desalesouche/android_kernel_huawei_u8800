@@ -1935,6 +1935,7 @@ static struct aps_12d_platform_data aps_12d_pdata = {
 	.irdr_current = APS_12D_IRDR_6P25,
 	.mod_freq = APS_12D_MOD_FREQ_DC,
 	.allow_reconfig = true,
+	.vcc_regulator = "gp4"
 };
 #endif
 
