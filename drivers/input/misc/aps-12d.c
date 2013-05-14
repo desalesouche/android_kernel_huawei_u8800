@@ -1,4 +1,18 @@
 /*
+ * Copyright (c) 2013, Rudolf Tammekivi.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ */
+
+/*
  * aps-12d.c
  * APS-12D Ambient Light & Proximity Sensor Driver
  */
@@ -99,8 +113,7 @@ static int aps_12d_adc_count(struct i2c_client *client)
 static void aps_12d_set_sensor_defaults(struct aps_12d_sensor_info *sensors)
 {
 	int i;
-	for (i = 0; i < NUM_SENSORS; i++)
-	{
+	for (i = 0; i < NUM_SENSORS; i++) {
 		sensors[i].type = i;
 		sensors[i].enabled = false;
 		sensors[i].poll_delay = MINIMUM_DELAY_NS;
@@ -156,8 +169,8 @@ static int aps_12d_set_settings(struct i2c_client *client,
 	dev_dbg(&client->dev,
 		"LED Current: 0x%02x, MOD Freq: 0x%02x, Res: 0x%02x, \
 		Range: 0x%02x. Final: 0x%02x\n",
-		settings->irdr_current, settings->mod_freq, settings->resolution,
-		settings->range, reg_data);
+		settings->irdr_current, settings->mod_freq,
+		settings->resolution, settings->range, reg_data);
 
 	ret = aps_12d_write_reg(client, CTRL_CMD2, reg_data);
 
@@ -188,9 +201,8 @@ static int aps_12d_set_status(struct aps_12d_data *data,
 	struct i2c_client *client = data->client;
 	int i;
 
-	/* If we turn the chip off, make sure every sensor is turned off aswell. */
-	if (status == APS_12D_STATUS_NONE)
-	{
+	/* If we turn the chip off, make sure every sensor is turned off. */
+	if (status == APS_12D_STATUS_NONE) {
 		data->sensors_enabled = 0;
 		for (i = 0; i < NUM_SENSORS; i++)
 			data->sensors[i].enabled = false;
@@ -198,8 +210,7 @@ static int aps_12d_set_status(struct aps_12d_data *data,
 
 	ret = _aps_12d_set_state(client, STATUS_TO_STATE(status));
 
-	if (ret)
-	{
+	if (ret) {
 		dev_err(&client->dev, "Failed to set status ret=%d\n", ret);
 		return ret;
 	}
@@ -213,8 +224,7 @@ static int aps_12d_power(struct aps_12d_data *data, bool on)
 {
 	int ret = 0;
 
-	if (data->vcc_regulator)
-	{
+	if (data->vcc_regulator) {
 		if (on)
 			ret = regulator_enable(data->vcc_regulator);
 		else
@@ -237,8 +247,7 @@ static void aps_12d_set_sensor(struct aps_12d_data *data,
 	data->sensors[type].enabled = enabled;
 
 	/* No sensors enabled, turn off the sensor. */
-	if (!data->sensors_enabled)
-	{
+	if (!data->sensors_enabled) {
 		mutex_lock(&data->sensor_mutex);
 		aps_12d_set_status(data, APS_12D_STATUS_NONE);
 		mutex_unlock(&data->sensor_mutex);
@@ -299,7 +308,8 @@ static void aps_12d_schedule(struct aps_12d_data *data,
 {
 	if (sensor->enabled)
 		schedule_delayed_work(&sensor->input_work,
-			nsecs_to_jiffies(sensor->poll_delay - MINIMUM_DELAY_NS));
+			nsecs_to_jiffies(
+				sensor->poll_delay - MINIMUM_DELAY_NS));
 	else
 		cancel_delayed_work(&sensor->input_work);
 }
@@ -375,7 +385,8 @@ work_end:
 static void aps_12d_input_prox_work_func(struct work_struct *work)
 {
 	struct aps_12d_data *data = container_of((struct delayed_work *)work,
-		struct aps_12d_data, sensors[APS_12D_SENSOR_PROXIMITY].input_work);
+		struct aps_12d_data,
+		sensors[APS_12D_SENSOR_PROXIMITY].input_work);
 
 	int surround_adc, proximity_adc, final_adc;
 
@@ -427,12 +438,13 @@ static int aps_12d_handle_enable(struct aps_12d_data *data,
 	struct aps_12d_sensor_info *sensors = data->sensors;
 	bool enabled;
 
-	switch (cmd)
-	{
+	switch (cmd) {
 		case APS_IOCTL_GET_LIGHT_ENABLE:
-			enabled = sensors[APS_12D_SENSOR_LIGHT].enabled; break;
+			enabled = sensors[APS_12D_SENSOR_LIGHT].enabled;
+			break;
 		case APS_IOCTL_GET_PROXIMITY_ENABLE:
-			enabled = sensors[APS_12D_SENSOR_PROXIMITY].enabled; break;
+			enabled = sensors[APS_12D_SENSOR_PROXIMITY].enabled;
+			break;
 		/* If the command does not match, check if we need to set. */
 		default:
 			goto set_enable;
@@ -448,15 +460,16 @@ set_enable:
 	if (copy_from_user(&enabled, argp, sizeof(enabled)))
 		return -EFAULT;
 
-	switch (cmd)
-	{
+	switch (cmd) {
 		case APS_IOCTL_SET_LIGHT_ENABLE:
 			aps_12d_set_sensor(data, APS_12D_SENSOR_LIGHT, enabled);
 			aps_12d_schedule(data, &sensors[APS_12D_SENSOR_LIGHT]);
 			break;
 		case APS_IOCTL_SET_PROXIMITY_ENABLE:
-			aps_12d_set_sensor(data, APS_12D_SENSOR_PROXIMITY, enabled);
-			aps_12d_schedule(data, &sensors[APS_12D_SENSOR_PROXIMITY]);
+			aps_12d_set_sensor(data, APS_12D_SENSOR_PROXIMITY,
+				enabled);
+			aps_12d_schedule(data,
+				&sensors[APS_12D_SENSOR_PROXIMITY]);
 			break;
 		default:
 			break;
@@ -473,12 +486,14 @@ static int aps_12d_handle_delay(struct aps_12d_data *data,
 	struct aps_12d_sensor_info *sensors = data->sensors;
 	int64_t poll_delay;
 
-	switch (cmd)
-	{
+	switch (cmd) {
 		case APS_IOCTL_GET_LIGHT_DELAY:
-			poll_delay = sensors[APS_12D_SENSOR_LIGHT].poll_delay; break;
+			poll_delay = sensors[APS_12D_SENSOR_LIGHT].poll_delay;
+			break;
 		case APS_IOCTL_GET_PROXIMITY_DELAY:
-			poll_delay = sensors[APS_12D_SENSOR_PROXIMITY].poll_delay; break;
+			poll_delay =
+				sensors[APS_12D_SENSOR_PROXIMITY].poll_delay;
+			break;
 		/* If the command does not match, check if we need to set. */
 		default:
 			goto set_delay;
@@ -495,12 +510,14 @@ set_delay:
 	if (copy_from_user(&poll_delay, argp, sizeof(poll_delay)))
 		return -EFAULT;
 
-	switch (cmd)
-	{
+	switch (cmd) {
 		case APS_IOCTL_SET_LIGHT_DELAY:
-			aps_12d_set_delay(data, APS_12D_SENSOR_LIGHT, poll_delay); break;
+			aps_12d_set_delay(data, APS_12D_SENSOR_LIGHT,
+				poll_delay);
+			break;
 		case APS_IOCTL_SET_PROXIMITY_DELAY:
-			aps_12d_set_delay(data, APS_12D_SENSOR_PROXIMITY, poll_delay);
+			aps_12d_set_delay(data, APS_12D_SENSOR_PROXIMITY,
+				poll_delay);
 			break;
 		default:
 			break;
@@ -516,19 +533,21 @@ static long aps_12d_ioctl(struct file *file, unsigned int cmd,
 	void __user *argp = (void __user *) arg;
 	struct aps_12d_data *data = file->private_data;
 
-	switch (cmd)
-	{
+	switch (cmd) {
 		case APS_IOCTL_GET_SETTINGS:
-			if (copy_to_user(argp, &data->settings, sizeof(data->settings)))
+			if (copy_to_user(argp, &data->settings,
+				sizeof(data->settings)))
 				return -EFAULT;
 			break;
 		case APS_IOCTL_SET_SETTINGS:
-			if (copy_from_user(&data->settings, argp, sizeof(data->settings)))
+			if (copy_from_user(&data->settings, argp,
+				sizeof(data->settings)))
 				return -EFAULT;
 			aps_12d_set_settings(data->client, &data->settings);
 			break;
 		case APS_IOCTL_GET_STATUS:
-			if (copy_to_user(argp, &data->status, sizeof(data->status)))
+			if (copy_to_user(argp, &data->status,
+				sizeof(data->status)))
 				return -EFAULT;
 			break;
 		case APS_IOCTL_GET_LIGHT_ENABLE:
@@ -574,16 +593,14 @@ static int __devinit aps_12d_probe(struct i2c_client *client,
 	struct aps_12d_data *data;
 	struct input_dev *input_device;
 
-	if (!pdata)
-	{
+	if (!pdata) {
 		dev_err(&client->dev, "No plaform data\n");
 		return -EPERM;
 	}
 
 	data = kzalloc(sizeof(struct aps_12d_data), GFP_KERNEL);
 	input_device = input_allocate_device();
-	if (!data || !input_device)
-	{
+	if (!data || !input_device) {
 		dev_err(&client->dev, "Failed to allocate memory\n");
 		ret = -ENOMEM;
 		goto err_free_mem;
@@ -595,10 +612,11 @@ static int __devinit aps_12d_probe(struct i2c_client *client,
 
 	set_bit(EV_ABS, input_device->evbit);
 	/* Ambient Light Sensor. */
-	input_set_abs_params(input_device, ABS_MISC, 0, APS_12D_MAX_VALUE, 0, 0);
+	input_set_abs_params(input_device,
+		ABS_MISC, 0, APS_12D_MAX_VALUE, 0, 0);
 	/* Proximity Sensor. */
-	input_set_abs_params(input_device, ABS_DISTANCE, 0,
-		APS_12D_MAX_VALUE, 0, 0);
+	input_set_abs_params(input_device,
+		ABS_DISTANCE, 0, APS_12D_MAX_VALUE, 0, 0);
 
 	data->client = client;
 	data->input_device = input_device;
@@ -611,54 +629,49 @@ static int __devinit aps_12d_probe(struct i2c_client *client,
 
 	mutex_init(&data->sensor_mutex);
 
-	if (data->pdata->vcc_regulator)
-	{
+	if (data->pdata->vcc_regulator) {
 		data->vcc_regulator = regulator_get(&data->client->dev,
 			data->pdata->vcc_regulator);
 
-		if (IS_ERR(data->vcc_regulator))
-		{
-			dev_err(&client->dev, "Failed to configure regulator\n");
+		if (IS_ERR(data->vcc_regulator)) {
+			dev_err(&client->dev,
+				"Failed to configure regulator\n");
 			data->vcc_regulator = NULL;
-		}
-		else
-		{
+		} else {
 			ret = regulator_set_voltage(data->vcc_regulator,
 				APS_MINIMUM_UV, APS_MAXIMUM_UV);
-			if (ret)
-			{
-				dev_err(&client->dev, "Failed to configure regulator voltage\n"
-					);
+			if (ret) {
+				dev_err(&client->dev, "Failed to configure "
+					"regulator voltage\n");
 				data->vcc_regulator = NULL;
 			}
 		}
 	}
 
 	ret = aps_12d_power(data, true);
-	if (ret)
-	{
+	if (ret) {
 		dev_err(&client->dev, "Failed to turn on power ret=%d\n", ret);
 		goto err_power;
 	}
 
 	ret = aps_12d_reset(data);
-	if (ret)
-	{
-		dev_err(&client->dev, "Failed to reset the device ret=%d\n", ret);
+	if (ret) {
+		dev_err(&client->dev, "Failed to reset the device ret=%d\n",
+			ret);
 		goto err_power;
 	}
 
 	ret = input_register_device(input_device);
-	if (ret)
-	{
-		dev_err(&client->dev, "Failed to register input device ret=%d\n", ret);
+	if (ret) {
+		dev_err(&client->dev, "Failed to register input device "
+			"ret=%d\n", ret);
 		goto err_unregister_device;
 	}
 
 	ret = misc_register(&aps_12d_dev);
-	if (ret)
-	{
-		dev_err(&client->dev, "Failed to initialize devfs ret=%d\n", ret);
+	if (ret) {
+		dev_err(&client->dev, "Failed to initialize devfs ret=%d\n",
+			ret);
 		goto err_unregister_device;
 	}
 

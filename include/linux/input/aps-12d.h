@@ -1,4 +1,18 @@
 /*
+ * Copyright (c) 2013, Rudolf Tammekivi.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ */
+
+/*
  * aps-12d.h
  * APS-12D Ambient Light & Proximity Sensor Header File
  */
@@ -16,8 +30,8 @@
 
 
 /* Convert type to status. */
-#define TYPE_TO_STATUS_ONCE(type)		(type << 0x1)
-#define TYPE_TO_STATUS_CONT(type)		((type << 0x1) + 0x1)
+#define TYPE_TO_STATUS_ONCE(type)	(type << 0x1)
+#define TYPE_TO_STATUS_CONT(type)	((type << 0x1) + 0x1)
 
 // (if 6 -> 0 : (if cont -> cont : once))
 #define STATUS_TO_STATE(status)	\
@@ -97,14 +111,14 @@ struct aps_12d_settings {
 
 #define APS_IOCTL_GET_STATUS	_IOR(APS_MAGIC, 0x12, enum aps_12d_status)
 
-#define APS_IOCTL_GET_LIGHT_ENABLE			_IOR(APS_MAGIC, 0x20, bool)
-#define APS_IOCTL_SET_LIGHT_ENABLE			_IOW(APS_MAGIC, 0x21, bool)
+#define APS_IOCTL_GET_LIGHT_ENABLE		_IOR(APS_MAGIC, 0x20, bool)
+#define APS_IOCTL_SET_LIGHT_ENABLE		_IOW(APS_MAGIC, 0x21, bool)
 #define APS_IOCTL_GET_PROXIMITY_ENABLE		_IOR(APS_MAGIC, 0x22, bool)
 #define APS_IOCTL_SET_PROXIMITY_ENABLE		_IOW(APS_MAGIC, 0x23, bool)
 
 /* Returns nanoseconds. */
-#define APS_IOCTL_GET_LIGHT_DELAY			_IOR(APS_MAGIC, 0x30, int64_t)
-#define APS_IOCTL_SET_LIGHT_DELAY			_IOW(APS_MAGIC, 0x31, int64_t)
+#define APS_IOCTL_GET_LIGHT_DELAY		_IOR(APS_MAGIC, 0x30, int64_t)
+#define APS_IOCTL_SET_LIGHT_DELAY		_IOW(APS_MAGIC, 0x31, int64_t)
 #define APS_IOCTL_GET_PROXIMITY_DELAY		_IOR(APS_MAGIC, 0x32, int64_t)
 #define APS_IOCTL_SET_PROXIMITY_DELAY		_IOW(APS_MAGIC, 0x33, int64_t)
 
