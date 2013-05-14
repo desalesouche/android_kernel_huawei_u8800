@@ -117,6 +117,7 @@ struct aps_12d_platform_data {
 
 	/* Allow the device to reconfigure it's settings at runtime. */
 	bool allow_reconfig;
+	const char *vcc_regulator;
 };
 #endif /* __KERNEL__ */
 

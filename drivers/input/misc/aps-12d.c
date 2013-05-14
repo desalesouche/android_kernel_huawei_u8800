@@ -13,12 +13,18 @@
 #include <linux/uaccess.h>
 #include <linux/input.h>
 #include <linux/i2c.h>
+#include <linux/regulator/consumer.h>
 #include <linux/input/aps-12d.h>
 
 #define CTRL_CMD1	0x00
 #define CTRL_CMD2	0x01
 #define DATA_LSB	0x02
 #define DATA_MSB	0x03
+
+/* Minimum operating voltage @2.25V */
+#define APS_MINIMUM_UV 2250000
+/* Maximum operating voltage @3.5V */
+#define APS_MAXIMUM_UV 3500000
 
 struct aps_12d_sensor_info {
 	enum aps_12d_sensor_type type;
@@ -39,6 +45,7 @@ struct aps_12d_data {
 	struct aps_12d_sensor_info sensors[NUM_SENSORS];
 	/* Keep index so we don't have to loop it through every time. */
 	int sensors_enabled;
+	struct regulator *vcc_regulator;
 };
 
 /* Global pointer for miscdevice. */
@@ -202,6 +209,21 @@ static int aps_12d_set_status(struct aps_12d_data *data,
 	return ret;
 }
 
+static int aps_12d_power(struct aps_12d_data *data, bool on)
+{
+	int ret = 0;
+
+	if (data->vcc_regulator)
+	{
+		if (on)
+			ret = regulator_enable(data->vcc_regulator);
+		else
+			ret = regulator_disable(data->vcc_regulator);
+	}
+
+	return ret;
+}
+
 /* Set sensor info inside the driver. */
 static void aps_12d_set_sensor(struct aps_12d_data *data,
 	enum aps_12d_sensor_type type, bool enabled)
@@ -232,12 +254,6 @@ static void aps_12d_set_delay(struct aps_12d_data *data,
 		sensor->poll_delay = MINIMUM_DELAY_NS;
 	else
 		sensor->poll_delay = delay;
-}
-
-static int aps_12d_power(struct aps_12d_data *data, bool on)
-{
-	/* Stub */
-	return 0;
 }
 
 static int aps_12d_reset(struct aps_12d_data *data)
@@ -595,6 +611,29 @@ static int __devinit aps_12d_probe(struct i2c_client *client,
 
 	mutex_init(&data->sensor_mutex);
 
+	if (data->pdata->vcc_regulator)
+	{
+		data->vcc_regulator = regulator_get(&data->client->dev,
+			data->pdata->vcc_regulator);
+
+		if (IS_ERR(data->vcc_regulator))
+		{
+			dev_err(&client->dev, "Failed to configure regulator\n");
+			data->vcc_regulator = NULL;
+		}
+		else
+		{
+			ret = regulator_set_voltage(data->vcc_regulator,
+				APS_MINIMUM_UV, APS_MAXIMUM_UV);
+			if (ret)
+			{
+				dev_err(&client->dev, "Failed to configure regulator voltage\n"
+					);
+				data->vcc_regulator = NULL;
+			}
+		}
+	}
+
 	ret = aps_12d_power(data, true);
 	if (ret)
 	{
@@ -637,20 +676,50 @@ err_unregister_device:
 	input_device = NULL;
 err_power:
 	aps_12d_power(data, false);
+	regulator_put(data->vcc_regulator);
 err_free_mem:
 	input_free_device(input_device);
 	kfree(data);
 	return ret;
 }
 
-static int __devexit aps_12d_remove(struct i2c_client *client)
+static int aps_12d_suspend(struct i2c_client *client, pm_message_t mesg)
 {
-	int ret;
 	struct aps_12d_data *data = i2c_get_clientdata(client);
 
+	aps_12d_power(data, false);
+
+	return 0;
+}
+
+static int aps_12d_resume(struct i2c_client *client)
+{
+	struct aps_12d_data *data = i2c_get_clientdata(client);
+
+	aps_12d_power(data, true);
+
+	return 0;
+}
+
+static int __devexit aps_12d_remove(struct i2c_client *client)
+{
+	int ret = 0;
+	struct aps_12d_data *data = i2c_get_clientdata(client);
+
+	input_unregister_device(data->input_device);
+	input_free_device(data->input_device);
+
+	misc_deregister(&aps_12d_dev);
+
 	mutex_lock(&data->sensor_mutex);
-	ret = aps_12d_set_status(data, APS_12D_STATUS_NONE);
+	aps_12d_set_status(data, APS_12D_STATUS_NONE);
+	aps_12d_power(data, false);
 	mutex_unlock(&data->sensor_mutex);
+
+	regulator_put(data->vcc_regulator);
+
+	kfree(data);
+
 	return ret;
 }
 
@@ -667,6 +736,8 @@ static struct i2c_driver aps_12d_driver = {
 		.name = "aps-12d",
 		.owner = THIS_MODULE,
 	},
+	.suspend    = aps_12d_suspend,
+	.resume     = aps_12d_resume,
 };
 
 static int __init aps_12d_init(void)
