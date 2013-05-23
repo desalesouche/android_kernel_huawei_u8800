@@ -754,18 +754,7 @@ static struct i2c_driver aps_12d_driver = {
 	.resume     = aps_12d_resume,
 };
 
-static int __init aps_12d_init(void)
-{
-	return i2c_add_driver(&aps_12d_driver);
-}
-
-static void __exit aps_12d_exit(void)
-{
-	i2c_del_driver(&aps_12d_driver);
-}
-
-module_init(aps_12d_init);
-module_exit(aps_12d_exit);
+module_i2c_driver(aps_12d_driver);
 
 MODULE_DESCRIPTION("APS-12D Ambient Light & Proximity Sensor Driver");
 MODULE_LICENSE("GPL");
