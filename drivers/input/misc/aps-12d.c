@@ -610,7 +610,9 @@ static int __devinit aps_12d_probe(struct i2c_client *client,
 	input_device->id.bustype = BUS_I2C;
 	input_device->dev.parent = &client->dev;
 
-	set_bit(EV_ABS, input_device->evbit);
+	input_set_capability(input_device, EV_ABS, ABS_MISC);
+	input_set_capability(input_device, EV_ABS, ABS_DISTANCE);
+
 	/* Ambient Light Sensor. */
 	input_set_abs_params(input_device,
 		ABS_MISC, 0, APS_12D_MAX_VALUE, 0, 0);
