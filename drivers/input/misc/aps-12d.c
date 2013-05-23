@@ -286,6 +286,10 @@ static void aps_12d_report(struct input_dev *input_device,
 {
 	mutex_lock(&input_device->mutex);
 
+	/* Reporting negative is not allowed. */
+	if (adc_count < 0)
+		adc_count = 0;
+
 	switch (type)
 	{
 		case APS_12D_SENSOR_LIGHT:
@@ -392,7 +396,6 @@ static void aps_12d_input_prox_work_func(struct work_struct *work)
 
 	mutex_lock(&data->sensor_mutex);
 
-work_start:
 	/* First, do the surround IR. */
 	aps_12d_write_proximity(data, true);
 
@@ -415,10 +418,6 @@ work_start:
 
 	/* Third, calculate the ADC. */
 	final_adc = proximity_adc - surround_adc;
-
-	// TODO: Redo the work, unstable.
-	if (final_adc < 0)
-		goto work_start;
 
 	/* Fourth, report the data. */
 	aps_12d_report(data->input_device, APS_12D_SENSOR_PROXIMITY, final_adc);
