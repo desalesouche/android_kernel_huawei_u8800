@@ -295,7 +295,7 @@ static void aps_12d_report(struct input_dev *input_device,
 			input_report_abs(input_device, ABS_DISTANCE, adc_count);
 			break;
 		default:
-			return;
+			break;
 	}
 
 	input_sync(input_device);
