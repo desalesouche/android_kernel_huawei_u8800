@@ -1960,11 +1960,11 @@ static struct lsm303dlh_acc_platform_data lsm303dlh_acc_pdata = {
 static struct lsm303dlh_mag_platform_data lsm303dlh_mag_pdata = {
 	.min_interval = 14,
 	.h_range = LSM303DLH_H_5_6G,
-	.axis_map_x = 0,
-	.axis_map_y = 1,
+	.axis_map_x = 1,
+	.axis_map_y = 0,
 	.axis_map_z = 2,
 	.negate_x = 0,
-	.negate_y = 0,
+	.negate_y = 1,
 	.negate_z = 0,
 };
 #endif
