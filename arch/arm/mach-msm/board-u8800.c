@@ -4887,7 +4887,6 @@ static void __init reserve_pmem_memory(void)
 static void __init reserve_mdp_memory(void)
 {
 	mdp_pdata.ov0_wb_size = MSM_FB_OVERLAY0_WRITEBACK_SIZE;
-	msm7x30_reserve_table[mdp_pdata.mem_hid].size += mdp_pdata.ov0_wb_size;
 }
 
 static void __init size_ion_devices(void)
