@@ -167,8 +167,8 @@ static int aps_12d_set_settings(struct i2c_client *client,
 	reg_data |= settings->range;
 
 	dev_dbg(&client->dev,
-		"LED Current: 0x%02x, MOD Freq: 0x%02x, Res: 0x%02x, \
-		Range: 0x%02x. Final: 0x%02x\n",
+		"LED Current: 0x%02x, MOD Freq: 0x%02x, Res: 0x%02x, "
+		"Range: 0x%02x. Final: 0x%02x\n",
 		settings->irdr_current, settings->mod_freq,
 		settings->resolution, settings->range, reg_data);
 
