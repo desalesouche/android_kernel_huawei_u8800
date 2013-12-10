@@ -463,4 +463,10 @@ config AB8500_BATTERY_THERM_ON_BATCTRL
 	  Say Y to enable battery temperature measurements using
 	  thermistor connected on BATCTRL ADC.
 
+config BATTERY_VOLTAGE
+	bool "Voltage Battery"
+	help
+	  Say Y to enable battery capacity measurements using closed-circuit
+	  voltage.
+
 endif # POWER_SUPPLY
