@@ -126,6 +126,7 @@ struct pm8058_platform_data {
 	struct pm8058_xo_pdata			*xo_buffer_pdata;
 	int					num_xo_buffers;
 	struct pmic8058_charger_data		*charger_pdata;
+	struct pm8xxx_pwm_platform_data		*pwm_pdata;
 };
 
 #endif  /* __MFD_PMIC8058_H__ */
