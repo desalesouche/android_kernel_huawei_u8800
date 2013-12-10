@@ -15,7 +15,6 @@
 #include <linux/errno.h>
 #include <linux/leds-pmic8058.h>
 #include <linux/pwm.h>
-#include <linux/pmic8058-pwm.h>
 #include <linux/hrtimer.h>
 #include <linux/i2c.h>
 #include <mach/pmic.h>
