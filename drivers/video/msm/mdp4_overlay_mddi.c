@@ -367,6 +367,8 @@ int mdp4_mddi_pipe_commit(int cndx, int wait)
 		mdp4_overlayproc_cfg(pipe);
 		mdp4_overlay_dmas_xy(pipe);
 		vctrl->blt_change = 0;
+	} else {
+		mdp4_overlay_dmas_xy(pipe);
 	}
 
 	pipe = vp->plist;
