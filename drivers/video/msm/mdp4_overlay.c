@@ -557,9 +557,8 @@ void mdp4_overlay_dmas_cfg(struct msm_fb_data_type *mfd)
 	else
 		dma_s_cfg_reg |= DMA_PACK_PATTERN_RGB;
 
-#ifdef BLT_RGB565
-	dma_s_cfg_reg |= DMA_IBUF_FORMAT_RGB565;
-#endif
+	if (mfd->fb_imgType == MDP_RGB_565)
+		dma_s_cfg_reg |= DMA_IBUF_FORMAT_RGB565;
 
 	dma_s_cfg_reg |= DMA_DITHER_EN;
 
