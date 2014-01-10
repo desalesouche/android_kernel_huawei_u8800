@@ -837,22 +837,25 @@ static void bq2415x_set_autotimer(struct bq2415x_device *bq, int state)
 static void bq2415x_compare_values(struct bq2415x_device *bq)
 {
 	bool reset = false;
+	int value = 0;
 
-	if (bq2415x_get_current_limit(bq) != bq->init_data.current_limit) {
+	value = bq2415x_get_current_limit(bq);
+	if (value != bq->init_data.current_limit) {
 		reset = true;
 		goto end;
 	}
-	if (bq2415x_get_weak_battery_voltage(bq)
-		!= bq->init_data.weak_battery_voltage) {
+	value = bq2415x_get_weak_battery_voltage(bq);
+	if (value != bq->init_data.weak_battery_voltage) {
 		reset = true;
 		goto end;
 	}
-	if (bq2415x_get_battery_regulation_voltage(bq)
-		!= bq->init_data.battery_regulation_voltage) {
+	value = bq2415x_get_battery_regulation_voltage(bq);
+	if (value != bq->init_data.battery_regulation_voltage) {
 		reset = true;
 		goto end;
 	}
-	if (bq2415x_get_charge_current(bq) != bq->init_data.charge_current) {
+	value = bq2415x_get_charge_current(bq);
+	if (value != bq->init_data.charge_current) {
 		reset = true;
 		goto end;
 	}
