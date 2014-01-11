@@ -295,21 +295,20 @@ static void aps_12d_report(struct aps_12d_data *data,
 	if (adc_count < 0)
 		adc_count = 0;
 
-	switch (type)
-	{
-		case APS_12D_SENSOR_LIGHT:
-			input_report_abs(input_device, ABS_MISC, adc_count);
-			break;
-		case APS_12D_SENSOR_PROXIMITY:
-			/* Hack: Userspace needs to sample this value. If it is
-			 * same value, it gets filtered. */
-			if (data->last_adc_count[type] == adc_count)
-				adc_count += 1;
+	switch (type) {
+	case APS_12D_SENSOR_LIGHT:
+		input_report_abs(input_device, ABS_MISC, adc_count);
+		break;
+	case APS_12D_SENSOR_PROXIMITY:
+		/* Hack: Userspace needs to sample this value. If it is
+		 * same value, it gets filtered. */
+		if (data->last_adc_count[type] == adc_count)
+			adc_count += 1;
 
-			input_report_abs(input_device, ABS_DISTANCE, adc_count);
-			break;
-		default:
-			break;
+		input_report_abs(input_device, ABS_DISTANCE, adc_count);
+		break;
+	default:
+		break;
 	}
 
 	data->last_adc_count[type] = adc_count;
@@ -450,16 +449,16 @@ static int aps_12d_handle_enable(struct aps_12d_data *data,
 	bool enabled;
 
 	switch (cmd) {
-		case APS_IOCTL_GET_LIGHT_ENABLE:
-			enabled = sensors[APS_12D_SENSOR_LIGHT].enabled;
-			break;
-		case APS_IOCTL_GET_PROXIMITY_ENABLE:
-			enabled = sensors[APS_12D_SENSOR_PROXIMITY].enabled;
-			break;
-		/* If the command does not match, check if we need to set. */
-		default:
-			goto set_enable;
-			break;
+	case APS_IOCTL_GET_LIGHT_ENABLE:
+		enabled = sensors[APS_12D_SENSOR_LIGHT].enabled;
+		break;
+	case APS_IOCTL_GET_PROXIMITY_ENABLE:
+		enabled = sensors[APS_12D_SENSOR_PROXIMITY].enabled;
+		break;
+	/* If the command does not match, check if we need to set. */
+	default:
+		goto set_enable;
+		break;
 	}
 
 	if (copy_to_user(argp, &enabled, sizeof(enabled)))
@@ -472,18 +471,16 @@ set_enable:
 		return -EFAULT;
 
 	switch (cmd) {
-		case APS_IOCTL_SET_LIGHT_ENABLE:
-			aps_12d_set_sensor(data, APS_12D_SENSOR_LIGHT, enabled);
-			aps_12d_schedule(data, &sensors[APS_12D_SENSOR_LIGHT]);
-			break;
-		case APS_IOCTL_SET_PROXIMITY_ENABLE:
-			aps_12d_set_sensor(data, APS_12D_SENSOR_PROXIMITY,
-				enabled);
-			aps_12d_schedule(data,
-				&sensors[APS_12D_SENSOR_PROXIMITY]);
-			break;
-		default:
-			break;
+	case APS_IOCTL_SET_LIGHT_ENABLE:
+		aps_12d_set_sensor(data, APS_12D_SENSOR_LIGHT, enabled);
+		aps_12d_schedule(data, &sensors[APS_12D_SENSOR_LIGHT]);
+		break;
+	case APS_IOCTL_SET_PROXIMITY_ENABLE:
+		aps_12d_set_sensor(data, APS_12D_SENSOR_PROXIMITY, enabled);
+		aps_12d_schedule(data, &sensors[APS_12D_SENSOR_PROXIMITY]);
+		break;
+	default:
+		break;
 	}
 
 	return 0;
@@ -498,17 +495,16 @@ static int aps_12d_handle_delay(struct aps_12d_data *data,
 	int64_t poll_delay;
 
 	switch (cmd) {
-		case APS_IOCTL_GET_LIGHT_DELAY:
-			poll_delay = sensors[APS_12D_SENSOR_LIGHT].poll_delay;
-			break;
-		case APS_IOCTL_GET_PROXIMITY_DELAY:
-			poll_delay =
-				sensors[APS_12D_SENSOR_PROXIMITY].poll_delay;
-			break;
-		/* If the command does not match, check if we need to set. */
-		default:
-			goto set_delay;
-			break;
+	case APS_IOCTL_GET_LIGHT_DELAY:
+		poll_delay = sensors[APS_12D_SENSOR_LIGHT].poll_delay;
+		break;
+	case APS_IOCTL_GET_PROXIMITY_DELAY:
+		poll_delay = sensors[APS_12D_SENSOR_PROXIMITY].poll_delay;
+		break;
+	/* If the command does not match, check if we need to set. */
+	default:
+		goto set_delay;
+		break;
 	}
 
 	if (copy_to_user(argp, &poll_delay, sizeof(poll_delay)))
@@ -522,16 +518,14 @@ set_delay:
 		return -EFAULT;
 
 	switch (cmd) {
-		case APS_IOCTL_SET_LIGHT_DELAY:
-			aps_12d_set_delay(data, APS_12D_SENSOR_LIGHT,
-				poll_delay);
-			break;
-		case APS_IOCTL_SET_PROXIMITY_DELAY:
-			aps_12d_set_delay(data, APS_12D_SENSOR_PROXIMITY,
-				poll_delay);
-			break;
-		default:
-			break;
+	case APS_IOCTL_SET_LIGHT_DELAY:
+		aps_12d_set_delay(data, APS_12D_SENSOR_LIGHT, poll_delay);
+		break;
+	case APS_IOCTL_SET_PROXIMITY_DELAY:
+		aps_12d_set_delay(data, APS_12D_SENSOR_PROXIMITY, poll_delay);
+		break;
+	default:
+		break;
 	}
 
 	return 0;
@@ -545,34 +539,32 @@ static long aps_12d_ioctl(struct file *file, unsigned int cmd,
 	struct aps_12d_data *data = file->private_data;
 
 	switch (cmd) {
-		case APS_IOCTL_GET_SETTINGS:
-			if (copy_to_user(argp, &data->settings,
-				sizeof(data->settings)))
-				return -EFAULT;
-			break;
-		case APS_IOCTL_SET_SETTINGS:
-			if (copy_from_user(&data->settings, argp,
-				sizeof(data->settings)))
-				return -EFAULT;
-			aps_12d_set_settings(data->client, &data->settings);
-			break;
-		case APS_IOCTL_GET_STATUS:
-			if (copy_to_user(argp, &data->status,
-				sizeof(data->status)))
-				return -EFAULT;
-			break;
-		case APS_IOCTL_GET_LIGHT_ENABLE:
-		case APS_IOCTL_SET_LIGHT_ENABLE:
-		case APS_IOCTL_GET_PROXIMITY_ENABLE:
-		case APS_IOCTL_SET_PROXIMITY_ENABLE:
-			aps_12d_handle_enable(data, cmd, arg);
-			break;
-		case APS_IOCTL_GET_LIGHT_DELAY:
-		case APS_IOCTL_SET_LIGHT_DELAY:
-		case APS_IOCTL_GET_PROXIMITY_DELAY:
-		case APS_IOCTL_SET_PROXIMITY_DELAY:
-			aps_12d_handle_delay(data, cmd, arg);
-			break;
+	case APS_IOCTL_GET_SETTINGS:
+		if (copy_to_user(argp, &data->settings, sizeof(data->settings)))
+			return -EFAULT;
+		break;
+	case APS_IOCTL_SET_SETTINGS:
+		if (copy_from_user(&data->settings, argp,
+			sizeof(data->settings)))
+			return -EFAULT;
+		aps_12d_set_settings(data->client, &data->settings);
+		break;
+	case APS_IOCTL_GET_STATUS:
+		if (copy_to_user(argp, &data->status, sizeof(data->status)))
+			return -EFAULT;
+		break;
+	case APS_IOCTL_GET_LIGHT_ENABLE:
+	case APS_IOCTL_SET_LIGHT_ENABLE:
+	case APS_IOCTL_GET_PROXIMITY_ENABLE:
+	case APS_IOCTL_SET_PROXIMITY_ENABLE:
+		aps_12d_handle_enable(data, cmd, arg);
+		break;
+	case APS_IOCTL_GET_LIGHT_DELAY:
+	case APS_IOCTL_SET_LIGHT_DELAY:
+	case APS_IOCTL_GET_PROXIMITY_DELAY:
+	case APS_IOCTL_SET_PROXIMITY_DELAY:
+		aps_12d_handle_delay(data, cmd, arg);
+		break;
 	}
 
 	return 0;
