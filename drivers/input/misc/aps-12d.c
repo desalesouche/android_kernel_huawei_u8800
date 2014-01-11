@@ -537,6 +537,7 @@ static long aps_12d_ioctl(struct file *file, unsigned int cmd,
 {
 	void __user *argp = (void __user *) arg;
 	struct aps_12d_data *data = file->private_data;
+	int ret = 0;
 
 	switch (cmd) {
 	case APS_IOCTL_GET_SETTINGS:
@@ -547,7 +548,7 @@ static long aps_12d_ioctl(struct file *file, unsigned int cmd,
 		if (copy_from_user(&data->settings, argp,
 			sizeof(data->settings)))
 			return -EFAULT;
-		aps_12d_set_settings(data->client, &data->settings);
+		ret = aps_12d_set_settings(data->client, &data->settings);
 		break;
 	case APS_IOCTL_GET_STATUS:
 		if (copy_to_user(argp, &data->status, sizeof(data->status)))
@@ -557,17 +558,20 @@ static long aps_12d_ioctl(struct file *file, unsigned int cmd,
 	case APS_IOCTL_SET_LIGHT_ENABLE:
 	case APS_IOCTL_GET_PROXIMITY_ENABLE:
 	case APS_IOCTL_SET_PROXIMITY_ENABLE:
-		aps_12d_handle_enable(data, cmd, arg);
+		ret = aps_12d_handle_enable(data, cmd, arg);
 		break;
 	case APS_IOCTL_GET_LIGHT_DELAY:
 	case APS_IOCTL_SET_LIGHT_DELAY:
 	case APS_IOCTL_GET_PROXIMITY_DELAY:
 	case APS_IOCTL_SET_PROXIMITY_DELAY:
-		aps_12d_handle_delay(data, cmd, arg);
+		ret = aps_12d_handle_delay(data, cmd, arg);
+		break;
+	default:
+		ret = -EINVAL;
 		break;
 	}
 
-	return 0;
+	return ret;
 }
 
 static int aps_12d_fops_open(struct inode *ip, struct file *file)
