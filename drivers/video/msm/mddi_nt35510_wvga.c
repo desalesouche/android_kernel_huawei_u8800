@@ -20,8 +20,6 @@
 
 #define ENTER_SLEEP_MODE			0x1000
 #define EXIT_SLEEP_MODE				0x1100
-#define SET_DISPLAY_OFF				0x2800
-#define SET_DISPLAY_ON				0x2900
 
 #define NT35510_PWM_LEVEL	256
 #define NT35510_PWM_FREQ_HZ	21480
@@ -36,17 +34,15 @@ static int mddi_nt35510_panel_on(struct platform_device *pdev)
 	mddi_host_client_cnt_reset();
 
 	mddi_queue_register_write(EXIT_SLEEP_MODE, 0, TRUE, 0);
-	mddi_wait(120);
-	mddi_queue_register_write(SET_DISPLAY_ON, 0, TRUE, 0);
+	mddi_wait(125);
 
 	return 0;
 }
 
 static int mddi_nt35510_panel_off(struct platform_device *pdev)
 {
-	mddi_queue_register_write(SET_DISPLAY_OFF, 0, TRUE, 0);
 	mddi_queue_register_write(ENTER_SLEEP_MODE, 0, TRUE, 0);
-	mddi_wait(120);
+	mddi_wait(10);
 
 	return 0;
 }
