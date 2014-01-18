@@ -548,7 +548,11 @@ static long aps_12d_ioctl(struct file *file, unsigned int cmd,
 		if (copy_from_user(&data->settings, argp,
 			sizeof(data->settings)))
 			return -EFAULT;
-		ret = aps_12d_set_settings(data->client, &data->settings);
+		if (data->settings.allow_reconfig)
+			ret = aps_12d_set_settings(data->client,
+				&data->settings);
+		else
+			ret = -EPERM;
 		break;
 	case APS_IOCTL_GET_STATUS:
 		if (copy_to_user(argp, &data->status, sizeof(data->status)))
