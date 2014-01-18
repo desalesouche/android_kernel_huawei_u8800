@@ -88,11 +88,11 @@ enum aps_12d_status {
 	APS_12D_STATUS_NONE,
 };
 
-#define NUM_SENSORS 2
 /* The type sent from userspace. */
 enum aps_12d_sensor_type {
 	APS_12D_SENSOR_LIGHT,
 	APS_12D_SENSOR_PROXIMITY,
+	APS_12D_SENSOR_MAX
 };
 
 struct aps_12d_settings {

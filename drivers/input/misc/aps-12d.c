@@ -56,9 +56,9 @@ struct aps_12d_data {
 
 	struct aps_12d_settings settings;
 	enum aps_12d_status status;
-	struct aps_12d_sensor_info sensors[NUM_SENSORS];
+	struct aps_12d_sensor_info sensors[APS_12D_SENSOR_MAX];
 
-	int last_adc_count[NUM_SENSORS];
+	int last_adc_count[APS_12D_SENSOR_MAX];
 
 	/* Keep index so we don't have to loop it through every time. */
 	int sensors_enabled;
@@ -116,7 +116,7 @@ static int aps_12d_adc_count(struct i2c_client *client)
 static void aps_12d_set_sensor_defaults(struct aps_12d_sensor_info *sensors)
 {
 	int i;
-	for (i = 0; i < NUM_SENSORS; i++) {
+	for (i = 0; i < APS_12D_SENSOR_MAX; i++) {
 		sensors[i].type = i;
 		sensors[i].enabled = false;
 		sensors[i].poll_delay = MINIMUM_DELAY_NS;
@@ -207,7 +207,7 @@ static int aps_12d_set_status(struct aps_12d_data *data,
 	/* If we turn the chip off, make sure every sensor is turned off. */
 	if (status == APS_12D_STATUS_NONE) {
 		data->sensors_enabled = 0;
-		for (i = 0; i < NUM_SENSORS; i++)
+		for (i = 0; i < APS_12D_SENSOR_MAX; i++)
 			data->sensors[i].enabled = false;
 	}
 
