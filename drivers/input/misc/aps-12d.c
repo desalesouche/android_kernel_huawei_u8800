@@ -75,7 +75,7 @@ static int aps_12d_read_reg(struct i2c_client *client, u8 reg)
 	/* Read register data. */
 	ret = i2c_smbus_read_byte_data(client, reg);
 	if (ret < 0)
-		dev_err(&client->dev, "Failed to read %d reg\n", reg);
+		dev_err(&client->dev, "Failed to read 0x%02x reg\n", reg);
 
 	return ret;
 }
@@ -87,7 +87,7 @@ static int aps_12d_write_reg(struct i2c_client *client, u8 reg, u8 val)
 	/* Write register data. */
 	ret = i2c_smbus_write_byte_data(client, reg, val);
 	if (ret)
-		dev_err(&client->dev, "Failed to write %d reg\n", reg);
+		dev_err(&client->dev, "Failed to write 0x%02x reg\n", reg);
 
 	return ret;
 }
