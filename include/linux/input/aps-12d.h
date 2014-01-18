@@ -123,13 +123,20 @@ struct aps_12d_settings {
 #define APS_IOCTL_SET_PROXIMITY_DELAY		_IOW(APS_MAGIC, 0x33, int64_t)
 
 #ifdef __KERNEL__
+/* struct aps_12d_platform_data
+ * @range - ADC data input range min-max
+ * @irdr_current - IR led current output
+ * @mod_freq - modulation frequency (DC or 39kHz)
+ * @resolution - n-bit data output (only 12-bit allowed)
+ * @allow_reconfig - allow userspace to modify settings (range for example)
+ * @vcc_regulator - the VCC analog power supply
+ */
 struct aps_12d_platform_data {
 	enum aps_12d_range range;
 	enum aps_12d_irdr_current irdr_current;
 	enum aps_12d_mod_freq mod_freq;
 	enum aps_12d_resolution resolution;
 
-	/* Allow the device to reconfigure it's settings at runtime. */
 	bool allow_reconfig;
 	const char *vcc_regulator;
 };
