@@ -7,7 +7,7 @@ obj-y += snddev_icodec.o
 endif
 
 ifeq ($(CONFIG_MACH_HUAWEI_U8800),y)
-obj-$(CONFIG_MARIMBA_CODEC) += snddev_data_marimba_u8800.o
+obj-$(CONFIG_MARIMBA_CODEC) += snddev_data_marimba_u8800pro.o
 else
 obj-$(CONFIG_MARIMBA_CODEC) += snddev_data_marimba.o
 endif
